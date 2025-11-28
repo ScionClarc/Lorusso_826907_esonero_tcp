@@ -34,14 +34,14 @@ void clearwinsock() {
 #endif
 }
 
-weather_response_t risp;
-weather_request_t request;
+risposta_t risp;
+richiesta_t req;
 
 
-int port;
+int porta;
 char *ip = "127.0.0.1";
-char type = 0;
-char city[MAX_CITY_LEN];
+char tipo = 0;
+char città [MAX_CITY_LEN];
 
 int main(int argc, char *argv[]) {
 
@@ -60,32 +60,33 @@ int main(int argc, char *argv[]) {
 		{
 			if (strlen(argv[i + 1]) < 2)
 			{
-				printf("Richiesta non valida\n"); return -1;
+				printf("Richiesta non valida\n");
+				return -1;
 			}
-			type = argv[i + 1][0];
-			strncpy(city, argv[i + 1] + 2, MAX_CITY_LEN - 1);
-			city[MAX_CITY_LEN - 1] = '\0';
+			tipo = argv[i + 1][0];
+			strncpy(città, argv[i + 1] + 2, MAX_CITY_LEN - 1);
+			città[MAX_CITY_LEN - 1] = '\0';
 		}
 	}
 
 
 	#if defined WIN32
 	// Inizializzazione Winsock
-	WSADATA wsa_data;
-	int result = WSAStartup(MAKEWORD(2,2), &wsa_data);
-	if (result != NO_ERROR) {
-		printf("Error at WSAStartup()\n");
+	WSADATA wsa;
+	int r = WSAStartup(MAKEWORD(2,2), &wsa);
+	if (r != NO_ERROR) {
+		printf("Errore in WSAStartup()\n");
 		return 0;
 	}
 	#endif
 
     //Creazione Socket
-    int my_socket;
-    my_socket = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP);
+    int iSocket;
+    iSocket = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP);
 
-    if (my_socket == -1)
+    if (iSocket == -1)
     {
-        printf("Creazione della Socket fallita.\n");
+        printf("Creazione del Socket fallita.\n");
         clearwinsock();
         return -1;
     }
@@ -100,71 +101,71 @@ int main(int argc, char *argv[]) {
     printf("Connessione al server %s sulla porta %d...\n", ip, server_port);
 
     // Connessione con il Server
-    if (connect(my_socket, (struct sockaddr*)&indirizzo_socket, sizeof(indirizzo_socket)) < 0)
+    if (connect(iSocket, (struct sockaddr*)&indirizzo_socket, sizeof(indirizzo_socket)) < 0)
     {
     	printf("Connessione fallita.\n");
-    	closesocket(my_socket);
+    	closesocket(iSocket);
     	clearwinsock();
     	return -1;
     }
 
     // Invio di dati al Server
-    request.type = type;
-    strncpy(request.city, city, MAX_CITY_LEN - 1);
-    request.city[MAX_CITY_LEN - 1] = '\0';
+    req.tipo = tipo;
+    strncpy(req.città, città, MAX_CITY_LEN - 1);
+    req.città[MAX_CITY_LEN - 1] = '\0';
 
-    if (send(my_socket, (char*)&request, sizeof(request), 0) != sizeof(request))
+    if (send(iSocket, (char*)&req, sizeof(req), 0) != sizeof(req))
     {
     	printf("Errore: messaggio non recapitato.\n");
-    	closesocket(my_socket);
+    	closesocket(iSocket);
     	clearwinsock();
     	return -1;
     }
 
     // Ricezione dati dal Server
-    int n = recv(my_socket, (char*)&response, sizeof(response), 0);
+    int n = recv(iSocket, (char*)&risp, sizeof(risp), 0);
     if (n <= 0) {
     	printf("Errore di ricezione dal server\n");
-    	closesocket(my_socket);
+    	closesocket(iSocket);
     	clearwinsock();
     	return -1;
     }
 
-    StampaInterfaccia(ip);
+    MostraGUI(ip);
 
-	printf("Client terminated.\n");
+	printf("Client chiuso.\n");
 
-	closesocket(my_socket);
+	closesocket(iSocket);
 	clearwinsock();
 	return 0;
 }
 
 
-void StampaInterfaccia(char* IP)
+void MostraGUI(char* IP)
 {
 	printf("Ricevuto risultato dal server ip %s. ", IP);
-	if (response.status == 0) {
-		switch (response.type)
+	if (risp.stato == 0) {
+		switch (risp.tipo)
 		{
 		case 't':
-			printf("%s: Temperatura = %.1f°C\n", city, response.value);
+			printf("%s: Temperatura = %.1f°C\n", città, risp.val);
 			break;
 		case 'h':
-			printf("%s: Umidità = %.1f%%\n", city, response.value);
+			printf("%s: Umidità = %.1f%%\n", città, risp.val);
 	        break;
 		case 'w':
-			printf("%s: Vento = %.1f km/h\n", city, response.value);
+			printf("%s: Vento = %.1f km/h\n", città, risp.val);
 	        break;
 		case 'p':
-			printf("%s: Pressione = %.1f hPa\n", city, response.value);
+			printf("%s: Pressione = %.1f hPa\n", città, risp.val);
 	        break;
 		}
 	}
-	else if (response.status == 1)
+	else if (risp.stato == 1)
 		{
 			printf("Città non disponibile\n");
 		}
-	else if (response.status == 2)
+	else if (risp.stato == 2)
 		{
 			printf("Richiesta non valida\n");
 		}

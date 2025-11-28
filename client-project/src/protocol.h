@@ -10,7 +10,7 @@
 
 // Shared application parameters
 #define SERVER_PORT 69420  // Server port (change if needed)
-#define BUFFER_SIZE 512    // Buffer size for messages
+#define BUFFER_SIZE 512    // grandezza buffer
 
 #define MAX_CITY_LEN 64
 

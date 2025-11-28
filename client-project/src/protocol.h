@@ -9,15 +9,24 @@
 #define PROTOCOL_H_
 
 // Shared application parameters
-#define SERVER_PORT 27015  // Server port (change if needed)
+#define SERVER_PORT 69420  // Server port (change if needed)
 #define BUFFER_SIZE 512    // Buffer size for messages
 
-// Function prototypes
-// Add here the signatures of the functions implemented by students
+#define MAX_CITY_LEN 64
 
-/*
- * Example function to implement:
- * int connect_to_server(const char* server_address);
- */
+//Prototipi
+void StampaGUI(char* IP);
+
+//Strutture Dati
+typedef struct {
+    char tipo;
+    char città[MAX_CITY_LEN];
+} richiesta_t;
+
+typedef struct {
+    unsigned int stato;
+    char tipo;
+    float val;
+} risposta_t;
 
 #endif /* PROTOCOL_H_ */
